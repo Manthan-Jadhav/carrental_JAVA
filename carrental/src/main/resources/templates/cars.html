@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Cars | Car Rental</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: #f4f6f8;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .car-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .car-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000012;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .car-card {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .car-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 22px #00000018;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{navbar :: navbar}"></div>
+
+
+<div th:if="${pickupDate != null and returnDate != null}"
+     style="margin: 20px 25px; padding: 16px 20px;
+            background: #eaf1ff; border-radius: 10px;">
+
+    <strong>Your Rental Details</strong>
+
+    <p>
+        Pickup:
+        <span th:text="${pickupDate}"></span>
+        &nbsp; | &nbsp;
+        Return:
+        <span th:text="${returnDate}"></span>
+    </p>
+
+    <p>
+        Rental Mode:
+        <strong th:text="${rentalMode}"></strong>
+    </p>
+</div>
+
+<h1>Available Cars</h1>
+
+<form action="/cars" method="get"
+      style="max-width:1100px; margin:20px auto;">
+
+    <label for="branchId">Select branch:</label>
+
+    <select id="branchId" name="branchId"
+            onchange="this.form.submit()">
+
+        <option value=""
+                th:selected="${selectedBranchId == null}">
+            All branches
+        </option>
+
+        <option value="1"
+                th:selected="${selectedBranchId == 1}">
+            Mumbai-Dadar
+        </option>
+
+        <option value="2"
+                th:selected="${selectedBranchId == 2}">
+            Pune-Shivajinagar
+        </option>
+    </select>
+
+
+    <label for="categoryId">Car type:</label>
+    <select id="categoryId" name="categoryId"
+            onchange="this.form.submit()">
+        <option value=""
+                th:selected="${selectedCategoryId == null}">
+            All types
+        </option>
+
+        <option th:each="category : ${categories}"
+                th:value="${category.categoryId}"
+                th:text="${category.categoryName}"
+                th:selected="${selectedCategoryId != null and selectedCategoryId == category.categoryId}">
+        </option>
+    </select>
+
+
+    <label for="sortOrder">Sort by price:</label>
+    <select id="sortOrder" name="sortOrder"
+            onchange="this.form.submit()">
+        <option value="asc"
+                th:selected="${selectedSortOrder == 'asc'}">
+            Price: Low to High
+        </option>
+        <option value="desc"
+                th:selected="${selectedSortOrder == 'desc'}">
+            Price: High to Low
+        </option>
+    </select>
+
+
+
+    <label for="seats">Seat capacity:</label>
+    <select id="seats" name="seats"
+            onchange="this.form.submit()">
+        <option value=""
+                th:selected="${selectedSeats == null}">
+            All seat capacities
+        </option>
+
+        <option th:each="capacity : ${seatCapacities}"
+                th:value="${capacity}"
+                th:text="${capacity} + ' seats'"
+                th:selected="${selectedSeats != null and selectedSeats == capacity}">
+        </option>
+    </select>
+
+
+    <label for="fuelType">Fuel Type</label>
+    <select id="fuelType" name="fuelType"
+            onchange="this.form.submit()">
+        <option value="">All Fuel Types</option>
+
+        <option th:each="fuel : ${fuelTypes}"
+                th:value="${fuel}"
+                th:text="${fuel}"
+                th:selected="${fuel == selectedFuelType}">
+        </option>
+    </select>
+
+
+    <input type="hidden" name="pickupDate" th:value="${pickupDate}">
+    <input type="hidden" name="returnDate" th:value="${returnDate}">
+    <input type="hidden" name="rentalMode" th:value="${rentalMode}">
+
+</form>
+
+
+<div class="car-list">
+    <a class="car-card"
+       th:each="car : ${cars}"
+       th:href="@{/cars/{carId}(carId=${car.carId},
+       pickupDate=${pickupDate},
+       returnDate=${returnDate},
+       rentalMode=${rentalMode})}">
+        <img th:src="${car.imageUrl}"
+             th:alt="${car.brand + ' ' + car.model}"
+             style="width:100%; height:180px; object-fit:cover; border-radius:8px;">
+        <h2 th:text="${car.brand + ' ' + car.model}">Car Name</h2>
+
+        <p th:text="${car.branch != null ? car.branch.branchName : 'Branch unavailable'}">
+            Branch Name
+        </p>
+
+        <p th:text="${car.year}">Year</p>
+
+        <p th:text="${car.colour}">Colour</p>
+
+        <p th:text="${car.fuelType + ' | ' + car.transmission}">
+            Fuel | Transmission
+        </p>
+
+        <p class="price">
+            ₹<span th:text="${car.pricePerDay}">0</span> / day
+        </p>
+    </a>
+</div>
+
+<p th:if="${#lists.isEmpty(cars)}" style="text-align:center;">
+    No cars available right now.
+</p>
+
+</body>
+</html>

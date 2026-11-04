@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+
+    <nav th:fragment="navbar" class="navbar">
+        <div class="navbar-brand">CarRental</div>
+
+        <div class="navbar-links">
+            <a th:href="@{/(pickupDate=${pickupDate},returnDate=${returnDate},rentalMode=${rentalMode})}">Home</a>
+            <a th:href="@{/cars}">Cars</a>
+
+            <!-- Admin Panel Link -->
+            <!-- <a th:if="${isAdmin}" th:href="@{/admin}" style="color: #f59e0b; font-weight: bold;">Admin Panel</a> -->
+
+
+            <a th:if="${isAuthenticated}" th:href="@{/profile}">Profile</a>
+            <a th:if="${isAuthenticated}" th:href="@{/my-bookings}">My Bookings</a>
+
+            <!-- <a th:if="${isAuthenticated and not isAdmin}" th:href="@{/my-bookings}">My Bookings</a> -->
+            <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" style="display:inline; margin:0;">
+                <button type="submit" class="nav-logout-btn">Logout</button>
+            </form>
+
+            <!-- Unauthenticated Links -->
+            <a th:unless="${isAuthenticated}" th:href="@{/login}">Login</a>
+            <a th:unless="${isAuthenticated}" th:href="@{/register}">Register</a>
+        </div>
+
+        <style>
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 18px 35px;
+                background: #172033;
+                color: white;
+                border-radius: 10px;
+                margin: 15px 25px;
+                box-sizing: border-box;
+            }
+
+            .navbar-brand {
+                font-size: 24px;
+                font-weight: bold;
+                letter-spacing: 0.5px;
+            }
+
+            .navbar-links {
+                display: flex;
+                align-items: center;
+                gap: 28px;
+            }
+
+            .navbar-links a {
+                color: white;
+                text-decoration: none;
+                font-size: 16px;
+            }
+
+            .navbar-links a:hover {
+                color: #60a5fa;
+            }
+
+            .nav-logout-btn {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                padding: 0;
+                font-family: inherit;
+            }
+
+            .nav-logout-btn:hover {
+                color: #f87171;
+            }
+        </style>
+    </nav>
+
+</body>
+
+</html>

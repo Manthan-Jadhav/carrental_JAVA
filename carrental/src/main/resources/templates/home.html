@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarRental | Home</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f8;
+            color: #172033;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 65px 20px 35px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #596579;
+        }
+
+        .search-panel {
+            max-width: 850px;
+            margin: 0 auto 50px;
+            padding: 30px;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 5px 22px rgba(0, 0, 0, 0.08);
+        }
+
+        .date-fields {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .field {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .field input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px;
+            border: 1px solid #cbd2dc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        .rental-mode {
+            margin: 25px 0;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .rental-mode span {
+            color: #2563eb;
+        }
+
+        .search-button {
+            width: 100%;
+            padding: 14px;
+            background: #172033;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background: #263b60;
+        }
+
+        #dateMessage {
+            color: #dc2626;
+            margin-top: 12px;
+        }
+
+        /* Filtered Rows Section Styles */
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto 55px;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 22px;
+        }
+
+        .section-header h2 {
+            font-size: 26px;
+            margin: 0 0 6px;
+            color: #172033;
+        }
+
+        .section-header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .view-all-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .view-all-link:hover {
+            text-decoration: underline;
+        }
+
+        .car-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 22px;
+        }
+
+        .home-car-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .home-car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 170px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .home-car-card:hover .card-img {
+            transform: scale(1.05);
+        }
+
+        .badge-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(17, 24, 39, 0.85);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
+        }
+
+        .card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 6px;
+            color: #172033;
+        }
+
+        .card-meta {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .card-price {
+            font-size: 17px;
+            font-weight: bold;
+            color: #172033;
+        }
+
+        .card-price small {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        .card-btn {
+            background: #172033;
+            color: white;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .home-car-card:hover .card-btn {
+            background: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<section class="hero">
+    <h1>Find Your Perfect Ride</h1>
+    <p>Choose your dates and discover your next drive.</p>
+</section>
+
+<div class="search-panel">
+    <form th:action="@{/cars}" method="post" id="rentalForm">
+
+        <div class="date-fields">
+            <div class="field">
+                <label for="pickupDate">Pickup date</label>
+                <input type="date"
+                       id="pickupDate"
+                       name="pickupDate"
+                       th:value="${pickupDate}"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="returnDate">Return date</label>
+                <input type="date"
+                       id="returnDate"
+                       name="returnDate"
+                       th:value="${returnDate}"
+                       required>
+            </div>
+        </div>
+
+        <div class="rental-mode">
+            Rental mode: <span id="rentalMode">Select your dates</span>
+        </div>
+
+        <input type="hidden"
+               name="rentalMode"
+               id="rentalModeInput"
+               th:value="${rentalMode}">
+
+        <button type="submit" class="search-button">
+            Explore Cars
+        </button>
+
+        <p id="dateMessage"></p>
+    </form>
+</div>
+
+<!-- 🔥 BEST SELLERS SECTION -->
+<section class="section-container" th:if="${bestSellers != null and !bestSellers.isEmpty()}">
+    <div class="section-header">
+        <div>
+            <h2>🔥 Best Sellers</h2>
+            <p>Our most popular rides frequently chosen by customers</p>
+        </div>
+        <a th:href="@{/cars}" class="view-all-link">Browse All Cars →</a>
+    </div>
+
+    <div class="car-cards-grid">
+        <a class="home-car-card"
+           th:each="car : ${bestSellers}"
+           th:href="@{/cars/{id}(id=${car.carId},pickupDate=${pickupDate},returnDate=${returnDate},rentalMode=${rentalMode})}">
+            <div class="card-img-wrapper">
+                <img class="card-img" th:src="${car.imageUrl}" th:alt="${car.brand + ' ' + car.model}">
+                <span class="badge-tag">POPULAR</span>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title" th:text="${car.brand + ' ' + car.model}">Car Model</h3>
+                <div class="card-meta">
+                    <span th:text="${car.fuelType}">Petrol</span> · 
+                    <span th:text="${car.transmission}">Manual</span> · 
+                    <span th:text="${car.year}">2022</span>
+                </div>
+                <div class="card-footer">
+                    <span class="card-price">₹<span th:text="${car.pricePerDay}">0</span> <small>/ day</small></span>
+                    <span class="card-btn">Rent</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- ⭐ TOP PICKS SECTION -->
+<section class="section-container" th:if="${topPicks != null and !topPicks.isEmpty()}">
+    <div class="section-header">
+        <div>
+            <h2>⭐ Top Picks</h2>
+            <p>Hand-picked premium vehicles tailored for your next journey</p>
+        </div>
+        <a th:href="@{/cars}" class="view-all-link">Browse All Cars →</a>
+    </div>
+
+    <div class="car-cards-grid">
+        <a class="home-car-card"
+           th:each="car : ${topPicks}"
+           th:href="@{/cars/{id}(id=${car.carId},pickupDate=${pickupDate},returnDate=${returnDate},rentalMode=${rentalMode})}">
+            <div class="card-img-wrapper">
+                <img class="card-img" th:src="${car.imageUrl}" th:alt="${car.brand + ' ' + car.model}">
+                <span class="badge-tag" style="background: rgba(37, 99, 235, 0.9);">FEATURED</span>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title" th:text="${car.brand + ' ' + car.model}">Car Model</h3>
+                <div class="card-meta">
+                    <span th:text="${car.fuelType}">Diesel</span> · 
+                    <span th:text="${car.transmission}">Automatic</span> · 
+                    <span th:text="${car.year}">2023</span>
+                </div>
+                <div class="card-footer">
+                    <span class="card-price">₹<span th:text="${car.pricePerDay}">0</span> <small>/ day</small></span>
+                    <span class="card-btn">Rent</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</section>
+
+<script>
+    const pickupDate = document.getElementById("pickupDate");
+    const returnDate = document.getElementById("returnDate");
+    const rentalMode = document.getElementById("rentalMode");
+    const rentalModeInput = document.getElementById("rentalModeInput");
+    const dateMessage = document.getElementById("dateMessage");
+
+    const today = new Date();
+    const localToday = new Date(
+        today.getTime() - today.getTimezoneOffset() * 60000
+    ).toISOString().split("T")[0];
+
+    pickupDate.min = localToday;
+    returnDate.min = localToday;
+
+    function updateRentalMode() {
+        dateMessage.textContent = "";
+        rentalModeInput.value = "";
+
+        if (!pickupDate.value || !returnDate.value) {
+            rentalMode.textContent = "Select your dates";
+            return;
+        }
+
+        returnDate.min = pickupDate.value;
+
+        if (returnDate.value <= pickupDate.value) {
+            rentalMode.textContent = "Invalid dates";
+            dateMessage.textContent =
+                "Return date must be after pickup date.";
+            return;
+        }
+
+        const pickup = new Date(pickupDate.value + "T00:00:00");
+        const returning = new Date(returnDate.value + "T00:00:00");
+
+        const duration = Math.round(
+            (returning - pickup) / (1000 * 60 * 60 * 24)
+        );
+
+        if (duration < 7) {
+            rentalMode.textContent =
+                "Daily Rental (" + duration + " days)";
+            rentalModeInput.value = "Daily";
+        } else {
+            rentalMode.textContent =
+                "Subscription (" + duration + " days)";
+            rentalModeInput.value = "Subscription";
+        }
+    }
+
+    pickupDate.addEventListener("change", () => {
+        returnDate.min = pickupDate.value;
+        updateRentalMode();
+    });
+
+    returnDate.addEventListener("change", updateRentalMode);
+
+    document.getElementById("rentalForm").addEventListener(
+        "submit",
+        event => {
+            updateRentalMode();
+
+            if (!pickupDate.value ||
+                !returnDate.value ||
+                returnDate.value <= pickupDate.value ||
+                !rentalModeInput.value) {
+
+                event.preventDefault();
+
+                if (!dateMessage.textContent) {
+                    dateMessage.textContent =
+                        "Please select valid pickup and return dates.";
+                }
+            }
+        }
+    );
+
+    // Restore the rental mode display when returning from the Cars page.
+    updateRentalMode();
+</script>
+
+</body>
+</html>

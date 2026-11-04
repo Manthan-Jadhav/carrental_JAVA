@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register | CarRental</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-box {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        h2 { text-align: center; }
+
+        label {
+            display: block;
+            margin: 15px 0 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 22px;
+            background: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .error { color: #dc2626; }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="register-box">
+
+    <h2>Create Account</h2>
+
+    <p class="error"
+       th:if="${error}"
+       th:text="${error}"></p>
+
+    <form th:action="@{/register}" method="post">
+
+        <label>Full Name</label>
+        <input type="text" name="name"
+               maxlength="100" required>
+
+        <label>Email</label>
+        <input type="email" name="email"
+               maxlength="100" required>
+
+        <label>Phone Number</label>
+        <input type="tel" name="phone"
+               maxlength="15" required>
+
+        <label>Password</label>
+        <input type="password" name="password"
+               minlength="8" required>
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <div class="login-link">
+        Already have an account?
+        <a th:href="@{/login}">Login</a>
+    </div>
+
+</div>
+</body>
+</html>

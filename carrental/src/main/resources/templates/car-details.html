@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>Car Details | CarRental</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #172033;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 20px 0;
+            color: #087f5b;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .details-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery, .info-card, .booking-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 3px 12px #0000000d;
+        }
+
+        /* Multi-Image Slider Styles */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 390px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #0f172a;
+            user-select: none;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 10px;
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            background: rgba(17, 24, 39, 0.72);
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .slider-btn:hover {
+            background: rgba(17, 24, 39, 0.95);
+            border-color: #ffffff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .prev-btn {
+            left: 14px;
+        }
+
+        .next-btn {
+            right: 14px;
+        }
+
+        .slider-counter {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(15, 23, 42, 0.75);
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 14px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.85);
+            transform: scale(1.2);
+        }
+
+        .dot.active {
+            background: #ffffff;
+            transform: scale(1.35);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .car-title {
+            margin-top: 22px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+        }
+
+        .specs {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .spec {
+            padding: 14px;
+            background: #f4f6f8;
+            border-radius: 8px;
+        }
+
+        .spec-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .booking-card {
+            height: fit-content;
+        }
+
+        .price {
+            font-size: 27px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .booking-button {
+            display: block;
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #087f5b;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .booking-button:hover {
+            background: #066849;
+        }
+
+        .booking-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .details-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .slider-container {
+                height: 260px;
+            }
+
+            .slider-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+        }
+
+        .package-option {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .package-option:has(input:checked) {
+            border-color: #087f5b;
+            background: #effaf5;
+        }
+
+        .info-popup {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 9px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .close-popup {
+            float: right;
+            border: 0;
+            background: transparent;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 18px;
+        }
+
+        .trip-date-field {
+            margin-bottom: 12px;
+        }
+
+        .trip-date-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+
+        .trip-date-input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fff;
+            color: #172033;
+        }
+
+        .trip-date-input:focus {
+            outline: none;
+            border-color: #087f5b;
+            box-shadow: 0 0 0 2px rgba(8, 127, 91, 0.15);
+        }
+
+        #tripDateMessage {
+            color: #dc2626;
+            font-size: 13px;
+            margin: 6px 0 0;
+            min-height: 18px;
+        }
+
+        /* You May Also Like Section */
+        .similar-section {
+            max-width: 1200px;
+            margin: 40px auto 30px;
+        }
+
+        .similar-container {
+            background: white;
+            border-radius: 14px;
+            padding: 28px 24px;
+            box-shadow: 0 3px 12px #0000000d;
+        }
+
+        .similar-header h2 {
+            font-size: 24px;
+            margin: 0 0 6px;
+            color: #172033;
+        }
+
+        .similar-header p {
+            margin: 0 0 22px;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .similar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .similar-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .similar-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: #087f5b;
+        }
+
+        .similar-img-wrapper {
+            width: 100%;
+            height: 155px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .similar-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .similar-card:hover .similar-img-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .similar-info {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .similar-info h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #172033;
+        }
+
+        .similar-specs {
+            margin: 0 0 14px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .similar-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .similar-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #087f5b;
+        }
+
+        .similar-price small {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        .similar-btn {
+            background: #087f5b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .similar-card:hover .similar-btn {
+            background: #066849;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{navbar :: navbar}"></div>
+
+<div style="max-width:1200px; margin:auto;">
+    <a class="back-link" th:href="@{/cars}">← Back to cars</a>
+</div>
+
+<div class="details-layout">
+
+    <section>
+        <div class="gallery">
+            <!-- Multi-Image Slider Container -->
+            <div class="slider-container">
+                <img id="sliderMainImage"
+                     class="main-image"
+                     th:src="${images[0]}"
+                     th:alt="${car.brand + ' ' + car.model}">
+
+                <!-- Left (<) and Right (>) side buttons -->
+                <button type="button"
+                        class="slider-btn prev-btn"
+                        id="prevSlideBtn"
+                        onclick="changeSlide(-1)"
+                        aria-label="Previous image">
+                    &#10094;
+                </button>
+
+                <button type="button"
+                        class="slider-btn next-btn"
+                        id="nextSlideBtn"
+                        onclick="changeSlide(1)"
+                        aria-label="Next image">
+                    &#10095;
+                </button>
+
+                <!-- Slide counter badge (e.g. 1 / 3) -->
+                <div class="slider-counter" id="slideCounter">
+                    1 / <span th:text="${#lists.size(images)}">1</span>
+                </div>
+
+                <!-- Dots indicator -->
+                <div class="slider-dots" id="sliderDots">
+                    <span th:each="img, stat : ${images}"
+                          class="dot"
+                          th:classappend="${stat.index == 0} ? ' active' : ''"
+                          th:attr="data-index=${stat.index}"
+                          onclick="goToSlide(this.getAttribute('data-index'))">
+                    </span>
+                </div>
+            </div>
+
+            <!-- Hidden image data elements for JS slider -->
+            <div id="imageGalleryData" style="display: none;">
+                <span th:each="img : ${images}" th:text="${img}" class="gallery-image-url"></span>
+            </div>
+
+            <h1 class="car-title"
+                th:text="${car.brand + ' ' + car.model}">
+                Car Name
+            </h1>
+
+            <p class="subtitle"
+                th:text="${car.year + ' · ' + car.fuelType + ' · ' + car.transmission}">
+                Car details
+            </p>
+        </div>
+
+        <div class="info-card" style="margin-top:20px;">
+            <h2>Vehicle Information</h2>
+
+            <div class="specs">
+                <div class="spec">
+                    <span class="spec-label">Brand</span>
+                    <strong th:text="${car.brand}">Brand</strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Model</span>
+                    <strong th:text="${car.model}">Model</strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Year</span>
+                    <strong th:text="${car.year}">Year</strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Colour</span>
+                    <strong th:text="${car.colour}">Colour</strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Fuel Type</span>
+                    <strong th:text="${car.fuelType}">Fuel</strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Transmission</span>
+                    <strong th:text="${car.transmission}">Transmission</strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Seats</span>
+                    <strong th:text="${car.category != null
+                        ? car.category.seatingCapacity : 'Not specified'}">
+                        Seats
+                    </strong>
+                </div>
+
+                <div class="spec">
+                    <span class="spec-label">Branch</span>
+                    <strong th:text="${car.branch != null
+                        ? car.branch.branchName : 'Unavailable'}">
+                        Branch
+                    </strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <aside class="booking-card">
+        <h2>Booking Summary</h2>
+
+        <div class="trip-details">
+            <h3>Your Trip</h3>
+            <div class="trip-date-field">
+                <label for="pickupDateInput">Pickup Date</label>
+                <input type="date" id="pickupDateInput" class="trip-date-input">
+            </div>
+            <div class="trip-date-field">
+                <label for="returnDateInput">Return Date</label>
+                <input type="date" id="returnDateInput" class="trip-date-input">
+            </div>
+            <p style="margin-top: 10px; margin-bottom: 4px;">
+                Rental Mode: <strong id="modeDisplay">Select your dates</strong>
+            </p>
+            <p id="tripDateMessage"></p>
+        </div>
+
+        <hr>
+
+        <h3>Kilometre Package</h3>
+
+        <label class="package-option">
+            <input type="radio" name="kmPackage" value="standard" checked>
+            <span>
+            <strong>1,400 km included</strong><br>
+            <small>No extra charge</small>
+        </span>
+        </label>
+
+        <label class="package-option">
+            <input type="radio" name="kmPackage" value="unlimited">
+            <span>
+            <strong>Unlimited kilometres</strong><br>
+            <small>+ ₹4,000 per booking</small>
+        </span>
+        </label>
+
+        <hr>
+
+        <h3>Travel with Confidence</h3>
+        <p id="coverageDescription">Automatically included</p>
+        <p><strong id="coveragePrice">₹559</strong></p>
+        <a href="#" id="coverageLearnMore">Learn more</a>
+
+        <div id="coverageInfo" class="info-popup" hidden>
+            <button type="button" class="close-popup"
+                    aria-label="Close coverage information">×</button>
+            <h4>Travel with Confidence</h4>
+            <p id="coverageInfoText"></p>
+            <p>This charge is included once per booking.</p>
+        </div>
+
+        <hr>
+
+        <h3>Refundable Security Deposit</h3>
+        <p>₹2,000</p>
+        <a href="#" id="depositLearnMore">Learn more</a>
+
+        <div id="depositInfo" class="info-popup" hidden>
+            <button type="button" class="close-popup"
+                    aria-label="Close deposit information">×</button>
+            <h4>Refundable Security Deposit</h4>
+            <p>A ₹2,000 security deposit is included in the amount payable.</p>
+            <p>It is refundable subject to the rental terms and any applicable deductions.</p>
+        </div>
+
+        <hr>
+
+        <h3>Price Breakdown</h3>
+
+        <p>Base rental: <strong id="basePrice">₹0</strong></p>
+        <p>Unlimited upgrade: <strong id="kmPrice">₹0</strong></p>
+        <p>Coverage: <strong id="coverageLinePrice">₹559</strong></p>
+        <p>Refundable deposit: <strong>₹2,000</strong></p>
+
+        <hr>
+
+        <p class="total-row">
+            Total payable now:
+            <strong id="totalPrice">₹0</strong>
+        </p>
+
+        <button class="booking-button" id="payNowButton" type="button">
+            Pay Now
+        </button>
+
+        <p class="subtitle" style="font-size:13px;">
+            Payment integration will be connected in a later step.
+        </p>
+    </aside>
+
+</div>
+
+<!-- YOU MAY ALSO LIKE SECTION -->
+<section class="similar-section" th:if="${similarCars != null and !similarCars.isEmpty()}">
+    <div class="similar-container">
+        <div class="similar-header">
+            <h2>You May Also Like</h2>
+            <p>Similar <span th:text="${car.category != null ? car.category.categoryName : 'cars'}">vehicles</span> you might be interested in</p>
+        </div>
+
+        <div class="similar-grid">
+            <a class="similar-card"
+               th:each="similar : ${similarCars}"
+               th:href="@{/cars/{id}(id=${similar.carId},pickupDate=${pickupDate},returnDate=${returnDate},rentalMode=${rentalMode})}">
+                <div class="similar-img-wrapper">
+                    <img th:src="${similar.imageUrl}" th:alt="${similar.brand + ' ' + similar.model}">
+                </div>
+                <div class="similar-info">
+                    <h3 th:text="${similar.brand + ' ' + similar.model}">Car Model</h3>
+                    <div class="similar-specs">
+                        <span th:text="${similar.fuelType}">Fuel</span> · 
+                        <span th:text="${similar.transmission}">Transmission</span> · 
+                        <span th:text="${similar.year}">Year</span>
+                    </div>
+                    <div class="similar-footer">
+                        <span class="similar-price">₹<span th:text="${similar.pricePerDay}">0</span> <small>/ day</small></span>
+                        <span class="similar-btn">View</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<div id="carPricingData"
+     th:data-price-per-day="${car.pricePerDay}">
+</div>
+
+
+<script>
+    // ==========================================
+    // 0. MULTI-IMAGE CAROUSEL SLIDER
+    // ==========================================
+
+    const galleryElements = document.querySelectorAll(".gallery-image-url");
+    const galleryImages = Array.from(galleryElements).map(el => el.textContent.trim());
+    let currentSlideIndex = 0;
+
+    function updateSlide(newIndex) {
+        if (!galleryImages || galleryImages.length === 0) return;
+
+        // Looping behavior
+        if (newIndex < 0) {
+            currentSlideIndex = galleryImages.length - 1;
+        } else if (newIndex >= galleryImages.length) {
+            currentSlideIndex = 0;
+        } else {
+            currentSlideIndex = newIndex;
+        }
+
+        const mainImg = document.getElementById("sliderMainImage");
+        if (mainImg) {
+            mainImg.style.opacity = "0.3";
+            setTimeout(() => {
+                mainImg.src = galleryImages[currentSlideIndex];
+                mainImg.style.opacity = "1";
+            }, 100);
+        }
+
+        // Update counter (e.g. 1 / 3)
+        const counter = document.getElementById("slideCounter");
+        if (counter) {
+            counter.textContent = (currentSlideIndex + 1) + " / " + galleryImages.length;
+        }
+
+        // Update active dot
+        const dots = document.querySelectorAll(".slider-dots .dot");
+        dots.forEach((dot, idx) => {
+            if (idx === currentSlideIndex) {
+                dot.classList.add("active");
+            } else {
+                dot.classList.remove("active");
+            }
+        });
+    }
+
+    function changeSlide(direction) {
+        updateSlide(currentSlideIndex + direction);
+    }
+
+    function goToSlide(index) {
+        updateSlide(Number(index));
+    }
+
+    // Keyboard navigation (Left / Right arrow keys)
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") {
+            changeSlide(-1);
+        } else if (e.key === "ArrowRight") {
+            changeSlide(1);
+        }
+    });
+
+    // ==========================================
+    // 1. GET BOOKING DATES & ELEMENTS
+    // ==========================================
+
+    const params = new URLSearchParams(window.location.search);
+    const initialPickup = params.get("pickupDate");
+    const initialReturn = params.get("returnDate");
+
+    const pickupDateInput = document.getElementById("pickupDateInput");
+    const returnDateInput = document.getElementById("returnDateInput");
+    const modeDisplay = document.getElementById("modeDisplay");
+    const tripDateMessage = document.getElementById("tripDateMessage");
+
+    const coveragePrice = document.getElementById("coveragePrice");
+    const coverageLinePrice = document.getElementById("coverageLinePrice");
+    const coverageDescription = document.getElementById("coverageDescription");
+    const coverageInfoText = document.getElementById("coverageInfoText");
+
+    const basePrice = document.getElementById("basePrice");
+    const kmPrice = document.getElementById("kmPrice");
+    const totalPrice = document.getElementById("totalPrice");
+    const payNowButton = document.getElementById("payNowButton");
+
+    // Spring Security CSRF protection
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+    const depositAmount = 2000;
+    const unlimitedCharge = 4000;
+
+    const priceElement = document.getElementById("carPricingData");
+    const dailyRate = Number(priceElement.dataset.pricePerDay) || 0;
+
+    let duration = 0;
+    let rentalMode = "";
+    let coverageCharge = 0;
+    let validBookingDates = false;
+
+    function formatRupees(amount) {
+        return "₹" + amount.toLocaleString("en-IN");
+    }
+
+    // Set minimum selectable dates to today
+    const today = new Date();
+    const localToday = new Date(
+        today.getTime() - today.getTimezoneOffset() * 60000
+    ).toISOString().split("T")[0];
+
+    pickupDateInput.min = localToday;
+    returnDateInput.min = localToday;
+
+    if (initialPickup) {
+        pickupDateInput.value = initialPickup;
+        returnDateInput.min = initialPickup;
+    }
+    if (initialReturn) {
+        returnDateInput.value = initialReturn;
+    }
+
+    // ==========================================
+    // 2. CALCULATE BOOKING DURATION & MODE
+    // ==========================================
+
+    function recalculateBooking() {
+        const pickupVal = pickupDateInput.value;
+        const returnVal = returnDateInput.value;
+        tripDateMessage.textContent = "";
+
+        if (!pickupVal || !returnVal) {
+            validBookingDates = false;
+            duration = 0;
+            rentalMode = "";
+            coverageCharge = 0;
+            modeDisplay.textContent = "Select your dates";
+            updateBill();
+            return;
+        }
+
+        returnDateInput.min = pickupVal;
+
+        if (returnVal <= pickupVal) {
+            validBookingDates = false;
+            duration = 0;
+            rentalMode = "";
+            coverageCharge = 0;
+            modeDisplay.textContent = "Invalid dates";
+            tripDateMessage.textContent = "Return date must be after pickup date.";
+            updateBill();
+            return;
+        }
+
+        const pickup = new Date(pickupVal + "T00:00:00");
+        const returning = new Date(returnVal + "T00:00:00");
+
+        duration = Math.round(
+            (returning - pickup) / (1000 * 60 * 60 * 24)
+        );
+
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+
+        if (
+            Number.isFinite(duration) &&
+            duration > 0 &&
+            !Number.isNaN(pickup.getTime()) &&
+            !Number.isNaN(returning.getTime()) &&
+            pickup >= todayDate
+        ) {
+            validBookingDates = true;
+
+            rentalMode = duration < 7
+                ? "Daily Rental"
+                : "Subscription";
+
+            coverageCharge = duration < 7 ? 559 : 2000;
+
+            modeDisplay.textContent =
+                rentalMode + " (" + duration +
+                (duration === 1 ? " day)" : " days)");
+
+            coverageDescription.textContent =
+                "Automatically included";
+
+            coveragePrice.textContent =
+                formatRupees(coverageCharge);
+
+            coverageLinePrice.textContent =
+                formatRupees(coverageCharge);
+
+            coverageInfoText.textContent =
+                rentalMode === "Daily Rental"
+                    ? "The Daily Rental Travel with Confidence charge is ₹559 per booking."
+                    : "The Subscription Travel with Confidence charge is ₹2,000 per booking.";
+        } else {
+            validBookingDates = false;
+            modeDisplay.textContent = "Invalid dates";
+        }
+
+        updateBill();
+    }
+
+    pickupDateInput.addEventListener("change", function () {
+        returnDateInput.min = pickupDateInput.value;
+        recalculateBooking();
+    });
+
+    returnDateInput.addEventListener("change", recalculateBooking);
+
+    // ==========================================
+    // 3. UPDATE PRICE BREAKDOWN
+    // ==========================================
+
+    function updateBill() {
+
+        const selectedPackage = document.querySelector(
+            'input[name="kmPackage"]:checked'
+        );
+
+        const upgradeCharge =
+            selectedPackage && selectedPackage.value === "unlimited"
+                ? unlimitedCharge
+                : 0;
+
+        const rentalCost = validBookingDates
+            ? dailyRate * duration
+            : 0;
+
+        const applicableCoverage = validBookingDates
+            ? coverageCharge
+            : 0;
+
+        const applicableDeposit = validBookingDates
+            ? depositAmount
+            : 0;
+
+        const total = rentalCost +
+            upgradeCharge +
+            applicableCoverage +
+            applicableDeposit;
+
+        basePrice.textContent = formatRupees(rentalCost);
+        kmPrice.textContent = formatRupees(upgradeCharge);
+
+        coverageLinePrice.textContent =
+            formatRupees(applicableCoverage);
+
+        totalPrice.textContent = formatRupees(total);
+
+        payNowButton.disabled = !validBookingDates;
+    }
+
+    // Recalculate when kilometre package changes
+    document.querySelectorAll('input[name="kmPackage"]').forEach(
+        function (radio) {
+            radio.addEventListener("change", updateBill);
+        }
+    );
+
+    // ==========================================
+    // 4. LEARN MORE POPUPS
+    // ==========================================
+
+    function setupPopup(linkId, popupId) {
+
+        const link = document.getElementById(linkId);
+        const popup = document.getElementById(popupId);
+        const closeButton = popup.querySelector(".close-popup");
+
+        link.addEventListener("click", function (event) {
+            event.preventDefault();
+            popup.hidden = false;
+        });
+
+        closeButton.addEventListener("click", function () {
+            popup.hidden = true;
+        });
+    }
+
+    setupPopup("coverageLearnMore", "coverageInfo");
+    setupPopup("depositLearnMore", "depositInfo");
+
+    // ==========================================
+    // 5. CHECK AVAILABILITY + CREATE BOOKING
+    // ==========================================
+
+    payNowButton.addEventListener("click", async function () {
+
+        if (!validBookingDates) {
+            alert("Please select valid rental dates.");
+            return;
+        }
+
+        // Get car ID from current URL
+        const carId = window.location.pathname
+            .split("/")
+            .filter(Boolean)
+            .pop();
+
+        // Get selected kilometre package
+        const selectedPackage = document.querySelector(
+            'input[name="kmPackage"]:checked'
+        );
+
+        if (!selectedPackage) {
+            alert("Please select a kilometre package.");
+            return;
+        }
+
+        const kmPackage = selectedPackage.value;
+        const currentPickupDate = pickupDateInput.value;
+        const currentReturnDate = returnDateInput.value;
+
+        // Prepare booking data
+        const bookingData = new URLSearchParams({
+            carId: carId,
+            pickupDate: currentPickupDate,
+            returnDate: currentReturnDate,
+            kmPackage: kmPackage
+        });
+
+        payNowButton.disabled = true;
+        payNowButton.textContent = "Checking availability...";
+
+        try {
+
+            // ==================================
+            // STEP A: CHECK CAR AVAILABILITY
+            // ==================================
+
+            const availabilityResponse = await fetch(
+                "/booking/check-availability?" +
+                bookingData.toString()
+            );
+
+            if (!availabilityResponse.ok) {
+                throw new Error("Availability check failed.");
+            }
+
+            const available = await availabilityResponse.json();
+
+            if (!available) {
+
+                alert(
+                    "Sorry! This car is unavailable for the selected dates.\n\n" +
+                    "Please choose another car or different dates."
+                );
+
+                return;
+            }
+
+            // ==================================
+            // STEP B: CREATE PENDING BOOKING
+            // ==================================
+
+            payNowButton.textContent = "Creating booking...";
+
+            const response = await fetch("/booking/create", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    [csrfHeader]: csrfToken
+                },
+                body: bookingData.toString()
+            });
+
+            // Detect login redirect or 401
+            if (
+                (response.redirected && response.url.includes("/login")) ||
+                response.status === 401
+            ) {
+
+                alert("Please log in before booking.");
+
+                window.location.href = "/login";
+                return;
+            }
+
+            const result = await response.text();
+
+            // ==================================
+            // STEP C: HANDLE BOOKING RESPONSE
+            // ==================================
+
+            if (!response.ok) {
+
+                alert(
+                    "Booking failed:\n\n" + result
+                );
+
+                return;
+            }
+
+            // Pending booking successfully created
+
+            const bookingId = result.match(/ID:\s*(\d+)/)?.[1];
+
+            if (!bookingId) {
+                alert("Booking created, but could not read booking ID.");
+                return;
+            }
+
+            // Simulate demo payment
+            const confirmData = new URLSearchParams({
+                bookingId: bookingId
+            });
+
+            payNowButton.textContent = "Confirming demo payment...";
+
+            const confirmResponse = await fetch("/booking/confirm", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    [csrfHeader]: csrfToken
+                },
+                body: confirmData.toString()
+            });
+
+            if (
+                (confirmResponse.redirected && confirmResponse.url.includes("/login")) ||
+                confirmResponse.status === 401
+            ) {
+                alert("Please log in before confirming booking.");
+                window.location.href = "/login";
+                return;
+            }
+
+            const confirmResult = await confirmResponse.text();
+
+            if (!confirmResponse.ok) {
+                alert(
+                    "Pending booking #" + bookingId +
+                    " was created, but confirmation failed:\n\n" +
+                    confirmResult
+                );
+                return;
+            }
+
+            alert(
+                "DEMO PAYMENT SUCCESSFUL!\n\n" +
+                "Booking ID: " + bookingId + "\n" +
+                "Status: Confirmed\n" +
+                "Payment: Paid\n\n" +
+                confirmResult
+            );
+
+            window.location.href = "/my-bookings";
+
+        } catch (error) {
+
+            console.error("Booking error:", error);
+
+            alert(
+                "Unable to process your booking.\n\n" +
+                "Please try again."
+            );
+
+        } finally {
+
+            payNowButton.disabled = !validBookingDates;
+            payNowButton.textContent = "Pay Now";
+        }
+    });
+
+    // ==========================================
+    // 6. INITIAL BILL CALCULATION
+    // ==========================================
+
+    recalculateBooking();
+
+</script>
+
+</body>
+</html>
