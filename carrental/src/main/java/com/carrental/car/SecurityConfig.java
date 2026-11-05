@@ -5,26 +5,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
 
-//     @Bean
-//     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-//         return (request, response, authentication) -> {
-//             boolean isAdmin = authentication.getAuthorities().stream()
-//                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-//             if (isAdmin) {
-//                 response.sendRedirect("/admin");
-//             } else {
-//                 response.sendRedirect("/profile");
-//             }
-//         };
-//     }
+    @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> "ROLE_ADMIN".equals(grantedAuthority.getAuthority()));
+            if (isAdmin) {
+                response.sendRedirect("/admin");
+            } else {
+                response.sendRedirect("/profile");
+            }
+        };
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http) throws Exception {
+            HttpSecurity http,
+            AuthenticationSuccessHandler successHandler) throws Exception {
 
         http
                 .authorizeHttpRequests(auth -> auth
@@ -38,13 +40,13 @@ public class SecurityConfig {
                                 "/img/**",
                                 "/booking/check-availability"
                         ).permitAll()
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/profile", true)
+                        .successHandler(successHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout

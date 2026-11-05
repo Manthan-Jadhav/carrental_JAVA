@@ -11,8 +11,7 @@ public class CustomerDetailsService implements UserDetailsService {
 
     private final CustomerRepository customerRepository;
 
-    public CustomerDetailsService(
-            CustomerRepository customerRepository) {
+    public CustomerDetailsService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
@@ -22,19 +21,17 @@ public class CustomerDetailsService implements UserDetailsService {
 
         Customer customer = customerRepository
                 .findByEmail(email.trim().toLowerCase())
-                .orElseThrow(()
-                        -> new UsernameNotFoundException(
-                                "Customer not found"
-                        )
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("Customer not found with email: " + email));
 
-        // String role = "CUSTOMER";
-        // if ("admin@carrental.com".equalsIgnoreCase(customer.getEmail())) {
-        //     role = "ADMIN";
-        // }
+        String role = customer.getRole();
+        if (role == null || role.trim().isEmpty()) {
+            role = "CUSTOMER";
+        }
+        role = role.trim().toUpperCase();
+
         return User.withUsername(customer.getEmail())
                 .password(customer.getPasswordHash())
-                .roles("CUSTOMER") // .roles(role)
+                .roles(role)
                 .build();
     }
 }

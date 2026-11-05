@@ -43,6 +43,7 @@ public class RegistrationController {
         customer.setEmail(email);
         customer.setPasswordHash(passwordEncoder.encode(password));
         customer.setPhone(phone);
+        customer.setRole("CUSTOMER");
 
         customerRepository.save(customer);
 

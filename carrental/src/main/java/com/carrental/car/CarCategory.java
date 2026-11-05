@@ -3,6 +3,7 @@ package com.carrental.car;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "CAR_CATEGORY")
 public class CarCategory {
 
     @Id
@@ -18,6 +19,13 @@ public class CarCategory {
 
     @Column(name = "seating_capacity")
     private Integer seatingCapacity;
+
+    public CarCategory() {
+    }
+
+    public CarCategory(Integer categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Integer getCategoryId() {
         return categoryId;

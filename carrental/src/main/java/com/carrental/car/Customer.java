@@ -23,6 +23,9 @@ public class Customer {
     @Column(name = "driving_license_no")
     private String drivingLicenseNo;
 
+    @Column(name = "role")
+    private String role = "CUSTOMER";
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -33,8 +36,6 @@ public class Customer {
     }
 
     // Getters and setters
-
-
     public Integer getCustomerId() {
         return customerId;
     }
@@ -81,6 +82,14 @@ public class Customer {
 
     public void setDrivingLicenseNo(String drivingLicenseNo) {
         this.drivingLicenseNo = drivingLicenseNo;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public LocalDateTime getCreatedAt() {

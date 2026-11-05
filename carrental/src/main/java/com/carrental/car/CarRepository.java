@@ -84,7 +84,7 @@ public interface CarRepository extends JpaRepository<Car, Integer> {
 
     @Query(value = """
     SELECT c.* FROM CAR c
-    WHERE LOWER(c.status) = LOWER(:status)
+    WHERE (LOWER(c.status) = LOWER(:status) OR LOWER(c.status) = 'discontinued')
       AND (:branchId IS NULL OR c.branch_id = :branchId)
       AND (:categoryId IS NULL OR c.category_id = :categoryId)
       AND (:seats IS NULL OR EXISTS (

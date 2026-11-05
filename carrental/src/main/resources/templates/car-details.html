@@ -632,8 +632,16 @@
             <strong id="totalPrice">₹0</strong>
         </p>
 
-        <button class="booking-button" id="payNowButton" type="button">
-            Pay Now
+        <div th:if="${car.status == 'Discontinued'}"
+             style="background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 12px 14px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 15px; text-align: center;">
+            ⚠️ This vehicle is Discontinued and currently unavailable for booking.
+        </div>
+
+        <button class="booking-button" id="payNowButton" type="button"
+                th:disabled="${car.status == 'Discontinued'}"
+                th:style="${car.status == 'Discontinued'} ? 'background: #94a3b8; cursor: not-allowed;' : ''">
+            <span th:if="${car.status == 'Discontinued'}">Unavailable / Discontinued</span>
+            <span th:unless="${car.status == 'Discontinued'}">Pay Now</span>
         </button>
 
         <p class="subtitle" style="font-size:13px;">
@@ -970,6 +978,10 @@
     // ==========================================
 
     payNowButton.addEventListener("click", async function () {
+
+        if (payNowButton.disabled) {
+            return;
+        }
 
         if (!validBookingDates) {
             alert("Please select valid rental dates.");

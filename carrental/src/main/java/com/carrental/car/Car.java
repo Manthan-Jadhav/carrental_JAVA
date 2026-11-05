@@ -149,13 +149,14 @@ public class Car {
         return category != null ? category.getCategoryId() : null;
     }
 
-    // public void setCategoryId(Integer categoryId) {
-    //     if (categoryId != null) {
-    //         this.category = new CarCategory(categoryId);
-    //     } else {
-    //         this.category = null;
-    //     }
-    // }
+    public void setCategoryId(Integer categoryId) {
+        if (categoryId != null) {
+            this.category = new CarCategory(categoryId);
+        } else {
+            this.category = null;
+        }
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -176,7 +177,7 @@ public class Car {
         return category;
     }
 
-    // public void setCategory(CarCategory category) {
-    //     this.category = category;
-    // }
+    public void setCategory(CarCategory category) {
+        this.category = category;
+    }
 }

@@ -16,13 +16,11 @@
             <a th:href="@{/cars}">Cars</a>
 
             <!-- Admin Panel Link -->
-            <!-- <a th:if="${isAdmin}" th:href="@{/admin}" style="color: #f59e0b; font-weight: bold;">Admin Panel</a> -->
-
+            <a th:if="${isAdmin}" th:href="@{/admin}" class="nav-admin-link">⚡ Admin Panel</a>
 
             <a th:if="${isAuthenticated}" th:href="@{/profile}">Profile</a>
-            <a th:if="${isAuthenticated}" th:href="@{/my-bookings}">My Bookings</a>
+            <a th:if="${isAuthenticated and not isAdmin}" th:href="@{/my-bookings}">My Bookings</a>
 
-            <!-- <a th:if="${isAuthenticated and not isAdmin}" th:href="@{/my-bookings}">My Bookings</a> -->
             <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" style="display:inline; margin:0;">
                 <button type="submit" class="nav-logout-btn">Logout</button>
             </form>
@@ -54,31 +52,47 @@
             .navbar-links {
                 display: flex;
                 align-items: center;
-                gap: 28px;
+                gap: 24px;
             }
 
             .navbar-links a {
                 color: white;
                 text-decoration: none;
                 font-size: 16px;
+                transition: color 0.2s;
             }
 
             .navbar-links a:hover {
                 color: #60a5fa;
             }
 
+            .nav-admin-link {
+                background: #f59e0b;
+                color: #0f172a !important;
+                font-weight: bold;
+                padding: 6px 14px;
+                border-radius: 6px;
+                transition: all 0.2s;
+            }
+
+            .nav-admin-link:hover {
+                background: #d97706 !important;
+                color: #ffffff !important;
+            }
+
             .nav-logout-btn {
-                background: none;
-                border: none;
+                background: #ef4444;
                 color: white;
-                font-size: 16px;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
                 cursor: pointer;
-                padding: 0;
-                font-family: inherit;
+                font-size: 15px;
+                font-weight: bold;
             }
 
             .nav-logout-btn:hover {
-                color: #f87171;
+                background: #dc2626;
             }
         </style>
     </nav>

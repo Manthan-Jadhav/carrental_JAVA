@@ -15,11 +15,11 @@ public class GlobalModelAdvice {
                 && !(authentication instanceof AnonymousAuthenticationToken);
     }
 
-    // @ModelAttribute("isAdmin")
-    // public boolean isAdmin(Authentication authentication) {
-    //     return authentication != null
-    //             && authentication.isAuthenticated()
-    //             && authentication.getAuthorities().stream()
-    //             .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-    // }
+    @ModelAttribute("isAdmin")
+    public boolean isAdmin(Authentication authentication) {
+        return authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    }
 }
