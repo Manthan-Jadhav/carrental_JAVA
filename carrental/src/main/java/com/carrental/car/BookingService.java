@@ -27,31 +27,29 @@ public class BookingService {
         this.carRepository = carRepository;
     }
 
-    // ==========================================
-    // 1. CHECK CAR AVAILABILITY
-    // ==========================================
+    
 
     public boolean isCarAvailable(
             Integer carId,
             LocalDate pickupDate,
             LocalDate returnDate) {
 
-        // Check missing dates
+       
         if (pickupDate == null || returnDate == null) {
             return false;
         }
 
-        // Return date must be after pickup date
+       
         if (!returnDate.isAfter(pickupDate)) {
             return false;
         }
 
-        // Prevent past pickup dates
+        
         if (pickupDate.isBefore(LocalDate.now())) {
             return false;
         }
 
-        // Check overlapping confirmed bookings
+       
         long overlaps = bookingRepository.countOverlappingBookings(
                 carId,
                 pickupDate,
@@ -61,9 +59,7 @@ public class BookingService {
         return overlaps == 0;
     }
 
-    // ==========================================
-    // 2. CREATE BOOKING
-    // ==========================================
+ 
 
     @Transactional
     public Booking createBooking(
@@ -73,7 +69,7 @@ public class BookingService {
             LocalDate returnDate,
             String kmPackage) {
 
-        // 1. Validate booking dates
+       
         if (pickupDate == null || returnDate == null ||
                 pickupDate.isBefore(LocalDate.now()) ||
                 !returnDate.isAfter(pickupDate)) {
@@ -83,7 +79,7 @@ public class BookingService {
             );
         }
 
-        // 2. Validate kilometre package
+        
         if (!"standard".equals(kmPackage) &&
                 !"unlimited".equals(kmPackage)) {
 
@@ -92,7 +88,7 @@ public class BookingService {
             );
         }
 
-        // 3. Lock car row to prevent simultaneous bookings
+        
         Car car = carRepository.findByIdForUpdate(carId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
@@ -100,50 +96,50 @@ public class BookingService {
                         )
                 );
 
-        // 4. Check car status
+        
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
             throw new IllegalStateException(
                     "Car is not rentable."
             );
         }
 
-        // 5. Recheck availability while holding the lock
+        
         if (!isCarAvailable(carId, pickupDate, returnDate)) {
             throw new IllegalStateException(
                     "Car is already booked for these dates."
             );
         }
 
-        // 6. Calculate rental duration
+        
         long days = ChronoUnit.DAYS.between(
                 pickupDate,
                 returnDate
         );
 
-        // 7. Calculate rental price
+        
         BigDecimal dailyRate = car.getPricePerDay();
 
         BigDecimal rentalAmount = dailyRate.multiply(
                 BigDecimal.valueOf(days)
         );
 
-        // 8. Kilometre package
+        // basic  - unlimited
         BigDecimal kmCharge =
                 "unlimited".equals(kmPackage)
                         ? BigDecimal.valueOf(4000)
                         : BigDecimal.ZERO;
 
-        // 9. Rental mode
+        // 559 & 2000 
         String rentalMode = days < 7
                 ? "Daily Rental"
                 : "Subscription";
 
-        // 10. Coverage charge
+        
         BigDecimal coverageCharge = days < 7
                 ? BigDecimal.valueOf(559)
                 : BigDecimal.valueOf(2000);
 
-        // 11. Security deposit
+        
         BigDecimal depositAmount =
                 BigDecimal.valueOf(2000);
 
@@ -170,11 +166,11 @@ public class BookingService {
         booking.setDepositAmount(depositAmount);
         booking.setTotalAmount(totalAmount);
 
-        // 14. Initial booking/payment statuses
+        // Initial  statuses
         booking.setBookingStatus("Pending");
         booking.setPaymentStatus("Pending");
 
-        // 15. Save booking to MySQL
+        // MySQL
         return bookingRepository.save(booking);
     }
 
@@ -185,7 +181,7 @@ public class BookingService {
             Integer bookingId,
             Integer customerId) {
 
-        // 1. Find the pending booking
+       
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
@@ -193,14 +189,14 @@ public class BookingService {
                         )
                 );
 
-        // 2. Verify booking ownership
+       
         if (!booking.getCustomerId().equals(customerId)) {
             throw new IllegalArgumentException(
                     "This booking does not belong to you."
             );
         }
 
-        // 3. Prevent duplicate payment confirmation
+        
         if (!"Pending".equals(booking.getBookingStatus()) ||
                 !"Pending".equals(booking.getPaymentStatus())) {
             throw new IllegalStateException(
@@ -208,7 +204,6 @@ public class BookingService {
             );
         }
 
-        // 4. Lock the car row
         Car car = carRepository.findByIdForUpdate(
                 booking.getCarId()
         ).orElseThrow(() ->
@@ -216,8 +211,7 @@ public class BookingService {
         );
 
 
-        // Re-read the booking after acquiring the car lock
-        // so concurrent confirmation requests see the latest status.
+    
         bookingRepository.flush();
 
         booking = bookingRepository.findById(bookingId)
@@ -233,14 +227,14 @@ public class BookingService {
         }
 
 
-        // 5. Verify car is rentable
+       
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
             throw new IllegalStateException(
                     "Car is not rentable."
             );
         }
 
-        // 6. Recheck availability under the lock
+      
         if (!isCarAvailable(
                 booking.getCarId(),
                 booking.getPickupDate(),
@@ -251,11 +245,11 @@ public class BookingService {
             );
         }
 
-        // 7. Simulate successful payment
+      
         booking.setPaymentStatus("Paid");
         booking.setBookingStatus("Confirmed");
 
-        // 8. Save confirmed booking
+        
         return bookingRepository.save(booking);
     }
 
@@ -265,7 +259,7 @@ public class BookingService {
             Integer bookingId,
             Integer customerId) {
 
-        // 1. Find the booking
+    
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
@@ -273,41 +267,40 @@ public class BookingService {
                         )
                 );
 
-        // 2. Verify ownership
+        
         if (!booking.getCustomerId().equals(customerId)) {
             throw new IllegalArgumentException(
                     "You cannot cancel this booking."
             );
         }
 
-        // 3. Lock the associated car
+        
         carRepository.findByIdForUpdate(booking.getCarId())
                 .orElseThrow(() ->
                         new IllegalArgumentException("Car not found.")
                 );
 
-        // 4. Reload booking after acquiring lock
+        
         entityManager.refresh(booking);
 
-        // 5. Prevent repeated cancellation
+        
         if ("Cancelled".equals(booking.getBookingStatus())) {
             throw new IllegalStateException(
                     "Booking is already cancelled."
             );
         }
 
-        // 6. Only allow cancellation before pickup
+        
         if (!booking.getPickupDate().isAfter(LocalDate.now())) {
             throw new IllegalStateException(
                     "Cannot cancel a booking on or after pickup date."
             );
         }
 
-        // 7. Update booking status
+       
         booking.setBookingStatus("Cancelled");
 
-        // Payment status stays unchanged.
-        // A paid booking requires a separate refund workflow.
+      
 
         return bookingRepository.save(booking);
     }

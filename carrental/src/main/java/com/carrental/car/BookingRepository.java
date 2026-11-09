@@ -12,13 +12,13 @@ import java.time.LocalDate;
 public interface BookingRepository
         extends JpaRepository<Booking, Integer> {
 
-    // 1. Fetch customer's bookings with car details
+    //Fetch customer bookings with car details
     @EntityGraph(attributePaths = "car")
     List<Booking> findByCustomerIdOrderByCreatedAtDesc(
             Integer customerId
     );
 
-    // 2. Check overlapping confirmed bookings
+    // Check overlapping confirmed bookings
     @Query("""
         SELECT COUNT(b) FROM Booking b
         WHERE b.carId = :carId

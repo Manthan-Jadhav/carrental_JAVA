@@ -60,7 +60,7 @@ public class Car {
     public Car() {
     }
 
-    // Getters and Setters
+   
     public Integer getCarId() {
         return carId;
     }

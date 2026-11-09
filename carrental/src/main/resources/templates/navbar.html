@@ -16,7 +16,7 @@
             <a th:href="@{/cars}">Cars</a>
 
             <!-- Admin Panel Link -->
-            <a th:if="${isAdmin}" th:href="@{/admin}" class="nav-admin-link">⚡ Admin Panel</a>
+            <a th:if="${isAdmin}" th:href="@{/admin}" class="nav-admin-link">⚡Admin Panel</a>
 
             <a th:if="${isAuthenticated}" th:href="@{/profile}">Profile</a>
             <a th:if="${isAuthenticated and not isAdmin}" th:href="@{/my-bookings}">My Bookings</a>

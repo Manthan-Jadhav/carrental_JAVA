@@ -29,9 +29,7 @@ public class BookingController {
         this.customerRepository = customerRepository;
     }
 
-    // ==========================================
-    // 1. CHECK CAR AVAILABILITY
-    // ==========================================
+    
 
     @GetMapping("/check-availability")
     @ResponseBody
@@ -49,9 +47,7 @@ public class BookingController {
         return ResponseEntity.ok(available);
     }
 
-    // ==========================================
-    // 2. CREATE PENDING BOOKING
-    // ==========================================
+
 
     @PostMapping("/create")
     @ResponseBody
@@ -62,7 +58,7 @@ public class BookingController {
             @RequestParam LocalDate returnDate,
             @RequestParam String kmPackage) {
 
-        // Verify authenticated customer
+        
         if (authentication == null ||
                 !authentication.isAuthenticated()) {
 
@@ -71,7 +67,7 @@ public class BookingController {
         }
 
         try {
-            // Find logged-in customer
+          
             Customer customer = customerRepository
                     .findByEmail(authentication.getName())
                     .orElseThrow(() ->
@@ -80,7 +76,7 @@ public class BookingController {
                             )
                     );
 
-            // Create pending booking
+            
             Booking booking = bookingService.createBooking(
                     customer.getCustomerId(),
                     carId,
@@ -121,7 +117,7 @@ public class BookingController {
         }
 
         try {
-            // Identify the logged-in customer
+           
             Customer customer = customerRepository
                     .findByEmail(authentication.getName())
                     .orElseThrow(() ->
@@ -130,7 +126,7 @@ public class BookingController {
                             )
                     );
 
-            // Simulate payment and confirm reservation
+       
             Booking booking = bookingService.confirmDemoPayment(
                     bookingId,
                     customer.getCustomerId()
@@ -162,7 +158,7 @@ public class BookingController {
             Authentication authentication) {
 
         try {
-            // Identify the logged-in customer
+           
             Customer customer = customerRepository
                     .findByEmail(authentication.getName())
                     .orElseThrow(() ->
@@ -171,7 +167,7 @@ public class BookingController {
                             )
                     );
 
-            // Cancel their booking
+           
             bookingService.cancelBooking(
                     bookingId,
                     customer.getCustomerId()

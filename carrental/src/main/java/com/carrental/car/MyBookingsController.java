@@ -31,7 +31,7 @@ public class MyBookingsController {
             Authentication authentication,
             Model model) {
 
-        // 1. Identify logged-in customer
+        
         String email = authentication.getName();
 
         Customer customer = customerRepository
@@ -42,13 +42,12 @@ public class MyBookingsController {
                         )
                 );
 
-        // 2. Fetch customer's bookings with car details
         List<Booking> bookings = bookingRepository
                 .findByCustomerIdOrderByCreatedAtDesc(
                         customer.getCustomerId()
                 );
 
-        // 3. Load car images
+       
         for (Booking booking : bookings) {
 
             Car car = booking.getCar();
@@ -73,7 +72,7 @@ public class MyBookingsController {
             car.setImageUrl(imageUrl);
         }
 
-        // 4. Send bookings to Thymeleaf
+       
         model.addAttribute("bookings", bookings);
 
         return "my-bookings";
